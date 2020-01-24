@@ -7,7 +7,7 @@
 * Joining Data in SQL
 * Intermediate SQL
 
-### Use SQL queries to find answers to the *Initial Questions*. You may use SQL, Excel Power Pivot, and/or Python to answer each of the *Open-Ended Questions*:
+### Use SQL queries to find answers to the questions.
 
 #### Questions
 
