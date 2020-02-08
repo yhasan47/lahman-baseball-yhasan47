@@ -150,18 +150,7 @@ LIMIT 1;
 */
 
 
-SELECT collegeplaying.schoolid, collegeplaying.playerid, people.namefirst, people.namelast, 
-sum(salary) 
-FROM salaries 
-INNER JOIN collegeplaying 
-ON collegeplaying.playerid = salaries.playerid
-INNER JOIN people 
-ON people.playerid = salaries.playerid
-WHERE collegeplaying.schoolid LIKE 'vandy%'
-GROUP BY collegeplaying.playerid, people.namefirst, people.namelast, collegeplaying.schoolid
-ORDER BY sum(salary) DESC;
-
--- Another code for Q3
+-- Code for Q3:
 
 SELECT schoolid, collegeplaying.playerid, namefirst, namelast, SUM(salary) as total_salary
 FROM collegeplaying 
