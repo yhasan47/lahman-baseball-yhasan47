@@ -1,0 +1,468 @@
+/*
+    QUESTION 1 ::
+        What range of years does the provided database cover? 
+    
+	SOURCES ::
+        * batting, pitching, fielding, appearances, teams, people
+    
+	DIMENSIONS ::
+        * yearid, debut, finalgame
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *  
+    
+	DESCRIPTION ::
+       
+	   
+    ANSWER ::
+        1871 through 2016 
+*/
+
+-- Different codes for Q1: 
+SELECT MIN (yearid), MAX (yearid)
+FROM batting
+
+SELECT MIN (yearid), MAX (yearid)
+FROM pitching
+
+SELECT MIN (yearid), MAX (yearid)
+FROM fielding
+
+SELECT MIN (yearid), MAX (yearid)
+FROM appearances
+
+SELECT MIN (yearid), MAX (yearid)
+FROM teams
+
+
+-- The following queries for Q1 gave the range from 1871 to 2017. 
+
+SELECT MIN (debut), MAX(finalgame)
+FROM people
+
+SELECT MIN (debut), MAX(debut)
+FROM people
+
+-- Aliasing for Q1:
+
+SELECT MIN(yearid) AS start_year, MAX(yearid) AS end_year
+FROM batting;
+
+SELECT MIN(debut) AS start_date, MAX(finalgame) AS end_date
+FROM people;
+
+
+-- The query that Taylor used in class for Q1: 
+
+SELECT MIN (min_year), MAX (max_year)
+FROM (
+	SELECT MIN (yearid) AS min_year, MAX(yearid) AS max_year
+	FROM batting
+UNION ALL 
+SELECT MIN (yearid), MAX (yearid)
+FROM fielding
+UNION ALL
+SELECT MIN (yearid), MAX (yearid)
+FROM pitching
+UNION ALL
+	SELECT MIN (yearid), MAX (yearid)
+	FROM teams
+) AS sub; 
+
+
+/*
+    QUESTION 2 ::
+        - Find the name and height of the shortest player in the database. 
+		- How many games did he play in? 
+		- What is the name of the team for which he played?
+    
+	SOURCES ::
+        * people, appearances, teams, 
+    
+	DIMENSIONS ::
+        * namefirst, namelast, height, teams, g_all
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * Name: Eddie Gaedel
+	     Height: 43 inches
+		 Total games played: 1
+		 Team: St. Louis Browns
+
+*/
+
+-- Code for Q2
+
+SELECT namefirst, namelast, MIN(height) AS height_inches, g_all AS total_games_played, 
+t.name AS team_name
+FROM people AS p
+INNER JOIN appearances AS a
+ON p.playerid = a.playerid
+INNER JOIN teams AS t
+ON a.teamID = t.teamID
+GROUP BY namefirst, namelast, height, g_all, t.name
+ORDER BY height  
+LIMIT 1;	
+   
+
+/*
+    QUESTION 3 ::
+        - Find all players in the database who played at Vanderbilt University. 
+		- Create a list showing each player’s first and last names as well as the total 
+		  salary they earned in the major leagues. Sort this list in descending order by 
+		  the total salary earned. 
+		- Which Vanderbilt player earned the most money in the majors?
+	
+	
+	SOURCES ::
+        *  salaries, collegeplaying, people, 
+    
+	DIMENSIONS ::
+        * schoolid, playerid, namefirst, namelast, salary, 
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * Played at Vandy:
+	   	 David Price, Pedro Alvarez, Scott Sanderson, Mike Minor, Joey Cora, Mark Prior, 
+	     Ryan Flaherty, Josh Paul, Sonny Gray, Mike Baxter, Jensen Lewis, Matt Kata,
+		 Nick Christiani, Jeremy Sowers, and ScottiMadison.
+		 
+		 David Price earned the most money. 
+*/
+
+
+SELECT collegeplaying.schoolid, collegeplaying.playerid, people.namefirst, people.namelast, 
+sum(salary) 
+FROM salaries 
+INNER JOIN collegeplaying 
+ON collegeplaying.playerid = salaries.playerid
+INNER JOIN people 
+ON people.playerid = salaries.playerid
+WHERE collegeplaying.schoolid LIKE 'vandy%'
+GROUP BY collegeplaying.playerid, people.namefirst, people.namelast, collegeplaying.schoolid
+ORDER BY sum(salary) DESC;
+
+-- Another code for Q3
+
+SELECT schoolid, collegeplaying.playerid, namefirst, namelast, SUM(salary) as total_salary
+FROM collegeplaying 
+INNER JOIN people 
+ON collegeplaying.playerid = people.playerid
+INNER JOIN salaries 
+ON people.playerid = salaries.playerid
+WHERE schoolid = 'vandy'
+GROUP BY schoolid, collegeplaying.playerid, namefirst, namelast
+ORDER BY total_salary DESC
+
+/*
+    QUESTION 4 ::
+        - Using the fielding table, group players into three groups based on their position: 
+		  label players with position OF as "Outfield", those with position "SS", "1B", "2B", 
+		  and "3B" as "Infield", and those with position "P" or "C" as "Battery". 
+		  Determine the number of putouts made by each of these three groups in 2016.
+	 
+	SOURCES :: fielding
+        *  
+    
+	DIMENSIONS ::
+        * yearid, positions
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q4:
+SELECT *
+FROM fielding
+
+SELECT yearid,
+	CASE 
+WHEN pos IN ('OF') THEN 'Outfield'
+WHEN pos IN ('SS','1B','2B','3B') THEN 'Infield'
+WHEN pos IN ('P','C') THEN 'Battery' 
+END AS positions,
+SUM(po)
+FROM fielding
+WHERE yearid=2016
+GROUP BY yearid, positions
+
+
+
+/*
+    QUESTION 5 ::
+        - Find the average number of strikeouts per game by decade since 1920. 
+		- Round the numbers you report to 2 decimal places. 
+		- Do the same for home runs per game. Do you see any trends?
+	 
+	SOURCES ::
+        *  batting
+    
+	DIMENSIONS ::
+        * yearid, so, hr
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q5: 
+
+SELECT yearid/10*10 AS decade, ROUND(AVG(so), 2) AS strikeouts, 
+ROUND(AVG(hr), 2) AS homeruns
+FROM batting
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade;
+
+/*
+    QUESTION 6 ::
+        Find the player who had the most success stealing bases in 2016, where success 
+		is measured as the percentage of stolen base attempts which are successful. 
+		(A stolen base attempt results either in a stolen base or being caught stealing.) 
+		Consider only players who attempted at least 20 stolen bases.
+	 
+	SOURCES ::
+        *  
+    
+	DIMENSIONS ::
+        * 
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+*/
+
+-- Code for Q6:
+
+
+SELECT namelast, 
+	   namefirst, 
+	   ROUND(SUM(sb)/(SUM(sb)+SUM(cs)::numeric)*100, 2) AS stolen_base_success_2016
+FROM batting
+LEFT JOIN people
+USING (playerid)
+WHERE yearid = 2016
+GROUP BY namelast, namefirst
+HAVING SUM(sb) + SUM(cs) >= 20
+ORDER BY stolen_base_success_2016 DESC
+LIMIT 1;
+
+
+
+/*
+    QUESTION 7 ::
+        - From 1970 – 2016, what is the largest number of wins for a team that did not win 
+		  the world series? 
+		- What is the smallest number of wins for a team that did win the world series? 
+		- Doing this will probably result in an unusually small number of wins 
+		  for a world series champion – determine why this is the case. 
+		- Then redo your query, excluding the problem year. How often from 1970 – 2016 was 
+		  it the case that a team with the most wins also won the world series? What percentage 
+		  of the time?
+	 
+	SOURCES ::
+        *  
+    
+	DIMENSIONS ::
+        * 
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q7:
+
+SELECT * 
+FROM teams;
+
+-- Most wins but not WS
+SELECT rank, yearid, SUM(w) AS wins, wswin, teamid
+FROM teams
+WHERE wswin = 'N' AND yearid BETWEEN 1970 AND 2016
+GROUP BY wswin, teamid, yearid, rank
+ORDER BY wins DESC
+LIMIT 1;
+
+-- Least wins and won WS
+
+SELECT SUM(w) AS wins, wswin, yearid, teamid
+FROM teams
+where wswin = 'Y' AND yearid BETWEEN 1970 AND 2016
+GROUP BY wswin, teamid, yearid
+ORDER BY wins;
+
+-- Part 3 Q7:
+/* How often from 1970 – 2016 was it the case that a team with the most wins also 
+   won the world series? What percentage of the time? */
+
+
+
+
+
+
+
+
+/*
+    QUESTION 8 ::
+        - Using the attendance figures from the homegames table, find the teams and parks 
+		  which had the top 5 average attendance per game in 2016 (where average attendance is 
+		  defined as total attendance divided by number of games). 
+		- Only consider parks where there were at least 10 games played. Report the park name, 
+		  team name, and average attendance. Repeat for the lowest 5 average attendance.
+	 
+	SOURCES ::
+        *  batting
+    
+	DIMENSIONS ::
+        * yearid, so, hr
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q8:
+
+SELECT * 
+FROM homegames;
+
+SELECT *
+FROM parks; 
+
+-- Top 5
+SELECT h.year, h.team, h.park, p.park_name, ((SUM(h.attendance))/h.games) AS avg_attendance
+FROM homegames AS h
+INNER JOIN parks AS p
+ON h.park = p.park
+WHERE year = '2016'
+GROUP BY h.year,h.team, h.park, h.games, p.park_name
+HAVING SUM(h.games) >=10
+ORDER BY avg_attendance DESC
+LIMIT 5;
+
+-- Bottom 5
+SELECT h.year, h.team, h.park, p.park_name, ((SUM(h.attendance))/h.games) AS avg_attendance
+FROM homegames AS h
+INNER JOIN parks as p
+ON h.park = p.park
+WHERE year = '2016'
+GROUP BY h.year,h.team, h.park, h.games, p.park_name
+HAVING SUM(h.games) >=10
+ORDER BY avg_attendance
+limit 5;
+
+/*
+    QUESTION 9 ::
+        - Which managers have won the TSN Manager of the Year award in both the 
+		  National League (NL) and the American League (AL)? 
+		- Give their full name and the teams that they were managing when they won the award.
+	 
+	SOURCES ::
+        *  
+    
+	DIMENSIONS ::
+        * 
+    
+	FACTS ::
+        * 
+			
+    FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q9: 
+
+
+WITH nl_managers AS(
+	SELECT playerid, yearid
+	FROM awardsmanagers
+	WHERE lgid = 'NL' AND awardid = 'TSN Manager of the Year'
+	GROUP BY playerid, yearid
+),
+al_managers AS(	
+	SELECT playerid, yearid
+	FROM awardsmanagers
+	WHERE lgid = 'AL' AND awardid = 'TSN Manager of the Year'
+	GROUP BY playerid, yearid
+	)	
+SELECT al_m.playerid, p.namefirst || ' ' ||p.namelast AS full_name, m.yearid, m.teamid
+	FROM nl_managers  nl_m
+	INNER JOIN al_managers al_m 
+	USING (playerid)
+	INNER JOIN people p 
+	USING (playerid)
+	LEFT JOIN managers m 
+	ON p.playerid = m.playerid AND (m.yearid = al_m.yearid or m.yearid = nl_m.yearid)
+	ORDER BY al_m.yearid, playerid;
