@@ -38,4 +38,4 @@ INNER JOIN teams AS t
 ON a.teamID = t.teamID
 GROUP BY namefirst, namelast, height, g_all, t.name
 ORDER BY height  
-LIMIT 1;
+LIMIT 1;	
