@@ -117,3 +117,50 @@ GROUP BY namefirst, namelast, height, g_all, t.name
 ORDER BY height  
 LIMIT 1;
 
+
+
+/*
+    QUESTION 3 ::
+        - Find all players in the database who played at Vanderbilt University. 
+	- Create a list showing each player’s first and last names as well as the total salary they earned in the major 
+	  leagues. Sort this list in descending order by  the total salary earned. 
+	- Which Vanderbilt player earned the most money in the majors?
+	
+	
+	SOURCES ::
+        *  salaries, collegeplaying, people, 
+    
+	DIMENSIONS ::
+        * schoolid, playerid, namefirst, namelast, salary, 
+    
+	FACTS ::
+        * 
+			
+    	FILTERS ::
+        *
+    
+	DESCRIPTION ::
+       *
+	   
+    ANSWER ::
+	   * Played at Vandy:
+	   	 David Price, Pedro Alvarez, Scott Sanderson, Mike Minor, Joey Cora, Mark Prior, 
+	     	 Ryan Flaherty, Josh Paul, Sonny Gray, Mike Baxter, Jensen Lewis, Matt Kata,
+		 Nick Christiani, Jeremy Sowers, and ScottiMadison.
+		 
+		 David Price earned the most money. 
+*/
+
+
+-- Code for Q3
+
+SELECT schoolid, collegeplaying.playerid, namefirst, namelast, SUM(salary) as total_salary
+FROM collegeplaying 
+INNER JOIN people 
+ON collegeplaying.playerid = people.playerid
+INNER JOIN salaries 
+ON people.playerid = salaries.playerid
+WHERE schoolid = 'vandy'
+GROUP BY schoolid, collegeplaying.playerid, namefirst, namelast
+ORDER BY total_salary DESC;
+
