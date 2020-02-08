@@ -164,3 +164,47 @@ WHERE schoolid = 'vandy'
 GROUP BY schoolid, collegeplaying.playerid, namefirst, namelast
 ORDER BY total_salary DESC;
 
+
+/*
+    QUESTION 4 ::
+        - Using the fielding table, group players into three groups based on their position: label players with 
+	  position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with 
+	  position "P" or "C" as "Battery". 
+	  Determine the number of putouts made by each of these three groups in 2016.
+	 
+	SOURCES :: fielding
+        *  
+    
+	DIMENSIONS ::
+        * yearid, positions
+    
+	FACTS ::
+        * 
+			
+    	FILTERS ::
+        *
+    
+	DESCRIPTION ::
+        *
+	   
+    	ANSWER ::
+	   * 
+
+*/
+
+-- Code for Q4:
+
+SELECT *
+FROM fielding
+
+SELECT yearid,
+	CASE 
+WHEN pos IN ('OF') THEN 'Outfield'
+WHEN pos IN ('SS','1B','2B','3B') THEN 'Infield'
+WHEN pos IN ('P','C') THEN 'Battery' 
+END AS positions,
+SUM(po)
+FROM fielding
+WHERE yearid=2016
+GROUP BY yearid, positions
+
